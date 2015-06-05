@@ -1,4 +1,4 @@
-(ns squee.impl.datasources
+(ns squee.datasources
   (:require [squee.impl.protocols :as p]
             [squee.impl.util :as util])
   (:import [java.sql Connection DriverManager]
