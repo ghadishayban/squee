@@ -1,14 +1,14 @@
-# jdbc2
+# squee
 
 A refreshed JDBC wrapper, made for Clojure 1.7
 
 # Rationale
 
 tl;dr:
-Ergonomics: consistent argument shapes
-Modernized implementation with cheap reducible result-sets
-Less seq and stack frame allocation compared to clojure.java.jdbc
-Smaller methods, modularized. (e.g. RowGenerator protocol)
+* Ergonomics: consistent argument shapes
+* Modernized implementation with cheap **reducible result-sets**
+* Less seq and stack frame allocation compared to clojure.java.jdbc
+* Smaller methods, modularized. (e.g. RowGenerator protocol)
 
 # Guide
 
@@ -25,10 +25,11 @@ Arguments all have the same shape `[conn sql params opts]`, and the first two ar
 # Examples
 
 ## Query
+```clj
 (query conn "select * from bar")
 
 (query conn "select * from bar where x = ?" (params 4))
-
+```
 ## Inserts
 
 ```clj
