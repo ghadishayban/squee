@@ -23,7 +23,7 @@ Arguments all have the same shape `[conn sql params opts]`, and the first two ar
 4. opts: a map of options
 
 # Examples
-
+[Full API docs](https://ghadishayban.github.io/squee/)
 ## Query
 ```clj
 (query conn "select * from bar")
