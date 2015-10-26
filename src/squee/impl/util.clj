@@ -23,7 +23,7 @@
   [m]
   (let [p (Properties.)]
     (doseq [[k v] m]
-      (.setProperty p k v))
+      (.setProperty p (name k) v))
     p))
 
 (def ^{:doc "Map of classnames to subprotocols"} classnames
