@@ -186,7 +186,7 @@
    (with-connection [conn some-IDataSource])
      .... body)"
   [binding & body]
-  `(with-open [~(with-meta (binding 0) {:tag Connection}) (p/open-connection ~(binding 1))]
+  `(with-open [~(with-meta (binding 0) {:tag 'Connection}) (p/open-connection ~(binding 1))]
      ~@body))
 
 (defn connect!
