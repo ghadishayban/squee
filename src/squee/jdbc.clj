@@ -18,7 +18,7 @@
    body within a transaction.  Arbitrarily nestable, but
    if an inner transaction rolls back on uncaught exception,
    the outermost will rollback as well.
-   
+
    Takes an *optional* opts map between the connection and the body,
    which supports :isolation and :read-only? options.
 
@@ -41,7 +41,7 @@
        (tx/run-transaction ~conn func# ~opts))))
 
 (defn reducible-result-set
-  "Low-level. Takes a result set and an option map, returns a 
+  "Low-level. Takes a result set and an option map, returns a
    reducible collection (clojure.lang.IReduceInit) on the result-set.
 
    opts supported:
@@ -54,11 +54,11 @@
   [rs opts]
   (let [{:keys [row-strategy name-keys]} opts]
     (rs/result-set* rs (or row-strategy rs/as-map)
-                       (or name-keys rs/default-key-fn))))
+                    (or name-keys rs/default-key-fn))))
 
 (defn execute-against-connection*
   "Low-level.
-   
+
    conn                  java.sql.Connection
    create-jdbc-statement function of a Connection -> Statement or PreparedStatement
    parameterize!         side-effecting function of a PreparedStatement.
@@ -170,10 +170,10 @@
 (defn insert-sql
   [table & cols]
   (str "INSERT INTO " table " ( "
-                (string/join ", " cols)
-                " ) VALUES ( "
-                (string/join ", " (repeat (count cols) "?"))
-                " )"))
+       (string/join ", " cols)
+       " ) VALUES ( "
+       (string/join ", " (repeat (count cols) "?"))
+       " )"))
 
 
 ;; maybe make SQL string be something that is protocolized.
@@ -194,7 +194,7 @@
     (with-connection [conn db-spec]
       (f conn .. args)
    and in the spirit of update-in/update/swap!, etc.
-   
+
    (connect! \"db query select * from foo where x = ?\" (params a))"
   ([db f a]
    (with-connection [conn db]
