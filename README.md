@@ -1,6 +1,6 @@
 # squee
 
-A refreshed JDBC wrapper, made for Clojure 1.7
+A refreshed JDBC wrapper, made for Clojure 1.7+
 
 # Rationale
 
@@ -14,13 +14,12 @@ tl;dr:
 
 ## Arguments
 
-Arguments all have the same shape `[conn sql params opts]`, and the first two are required.
+Arguments all have the same shape `[conn sql opts]`, and the first two
+are required.
 
-1. conn:  a connection or transaction
-2. sql:   a SQL string
-3. params: a function that manipulates the sql statement, usually filling in templated values.
-  There are two such built-ins, `params` and `many`. See below
-4. opts: a map of options
+1. conn: a connection or transaction
+2. sql:  a SQL string
+3. opts: a map of options
 
 # Examples
 [Full API docs](https://ghadishayban.github.io/squee/doc/)
@@ -28,16 +27,16 @@ Arguments all have the same shape `[conn sql params opts]`, and the first two ar
 ```clj
 (query conn "select * from bar")
 
-(query conn "select * from bar where x = ?" (params 4))
+(query conn "select * from bar where x = ?" {:params [4]})
 ```
 ## Inserts
 
 ```clj
 (let [sql "insert into foo (x,y) values (?,?)"]
-  (execute! conn sql (params 42 40) {:return-keys? true}))
+  (execute! conn sql {:params [42 40] :return-keys? true}))
 
 (let [sql "insert into foo (x,y) values (?,?)"]
-  (execute! conn sql (many [[20 30] [40 50]])))
+  (execute! conn sql {:many [[20 30] [40 50]]}))
 ```
 
 ## Transactions
@@ -54,21 +53,21 @@ You can set the isolation level like so:
   ...body)
 ```
 
-### Param Helpers
+### Options Param Helpers
 
 Statement params come in two flavors, one or many, dependending on
 how many times the entire sql statement is used
 
 ```clj
-(params ...)
-(many [ [...] [...] [...] ...])    ;; this can be an lazy or an eduction too
+{:params [...]}
+{:many [ [...] [...] [...] ...]}    ;; this can be an lazy or an eduction too
 ```
 
 ## Reducible Result sets
 
-While clojure.java.jdbc uses lazy-seqs and a naive strategy to extract data from a ResultSet,
-results from `query` in this library implement clojure.lang.IReduceInit, and are very efficient
-to realize.
+While clojure.java.jdbc uses lazy-seqs and a naive strategy to extract
+data from a ResultSet, results from `query` in this library implement
+clojure.lang.IReduceInit, and are very efficient to realize.
 
 ## Extension points
 ...

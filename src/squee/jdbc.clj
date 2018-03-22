@@ -68,16 +68,16 @@
     (parameterize! jstmt)
     (realize! jstmt)))
 
-(defn params
+(defn ^:private params
   "Returns a params function that parameterizes an SQL statement *once*.
 
    Takes multiple arguments"
-  [& xs]
+  [xs]
   (fn [jstmt]
     (st/apply-batch-params jstmt xs)))
 
 ;; does this need to be a once fn?
-(defmacro many
+(defmacro ^:private many
   "Returns a params function that parameterizes an SQL statement *multiple* times.
 
    Takes a collection of collections."
@@ -90,25 +90,37 @@
     (->> (reducible-result-set rs opts)
          (into []))))
 
+(defn opts->statement-fn
+  [{p :params
+    m :many
+    statement-fn :statement-fn
+    :as opts}]
+  (cond
+    p (params p)
+    m (many m)
+    (ifn? statement-fn) (statement-fn)
+    :else identity))
+
 (defn ^:private query*
-  [conn sql set-params! opts]
+  [conn sql opts]
   (let [{:keys [create-statement! result-set-fn]} opts
         result-set-fn (or result-set-fn (default-rs-fn opts))]
     (execute-against-connection* (p/get-connection conn)
                                  (or create-statement! #(st/prepare-statement % sql opts))
-                                 (or set-params! identity)
+                                 (opts->statement-fn opts)
                                  (partial st/realize-query! result-set-fn))))
 
 (defn query
   "Execute an SQL query against a Connection or open transaction.
-   params is a function that parameterizes the query, like #'params
 
    Examples:
    (query conn \"select * from bar\")
 
-   (query conn \"select * from foo where x = ? and y = ? \" (params 4 5))
+   (query conn \"select * from foo where x = ? and y = ? \" {:params [4 5]}))
 
    opts supported:
+    :params Coll of values that parameterizes an SQL statement *once*
+    :many Collection of collections of values that parameterize an SQL statement *multiple* times
     :result-type :forward-only | :scroll-insensitive | :scroll-sensitive
     :concurrency :read-only | :updatable
     :cursors
@@ -124,11 +136,9 @@
     :row-strategy
     :name-keys"
   ([conn sql]
-   (query* conn sql nil nil))
-  ([conn sql params]
-   (query* conn sql params nil))
-  ([conn sql params opts]
-   (query* conn sql params opts)))
+   (query* conn sql nil))
+  ([conn sql opts]
+   (query* conn sql opts)))
 
 ;; query
 ;;  no params
@@ -142,30 +152,27 @@
 ;;  set multiple params, returning keys
 
 (defn ^:private execute*
-  [conn sql set-params! opts]
+  [conn sql opts]
   (let [{:keys [create-statement! return-keys]} opts]
     (execute-against-connection* (p/get-connection conn)
                                  (or create-statement! #(st/prepare-statement % sql opts))
-                                 (or set-params! identity)
+                                 (opts->statement-fn opts)
                                  (partial st/realize-batch! return-keys))))
 
 (defn execute!
   "Execute an SQL query against a Connection or open transaction.
-   params is a function that parameterizes the query, like #'params
 
    Examples:
    (query conn \"select * from bar\")
 
-   (query conn \"select * from foo where x = ? and y = ? \" (params 4 5))
+   (query conn \"select * from foo where x = ? and y = ? \" {:params [4 5]})
 
    Supports all opts that #'query supports
    Additionally `:return-keys? true`  will return database-generated keys."
   ([conn sql]
-   (execute* conn sql nil nil))
-  ([conn sql params]
-   (execute* conn sql params nil))
-  ([conn sql params opts]
-   (execute* conn sql params opts)))
+   (execute* conn sql nil))
+  ([conn sql opts]
+   (execute* conn sql opts)))
 
 (defn insert-sql
   [table & cols]
@@ -195,7 +202,7 @@
       (f conn .. args)
    and in the spirit of update-in/update/swap!, etc.
 
-   (connect! \"db query select * from foo where x = ?\" (params a))"
+   (connect! \"db query select * from foo where x = ?\" {:params [a]}))"
   ([db f a]
    (with-connection [conn db]
      (f conn a)))
