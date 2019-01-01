@@ -154,9 +154,9 @@
    params is a function that parameterizes the query, like #'params
 
    Examples:
-   (query conn \"select * from bar\")
+   (execute! conn \"select * from bar\")
 
-   (query conn \"select * from foo where x = ? and y = ? \" (params 4 5))
+   (execute! conn \"select * from foo where x = ? and y = ? \" (params 4 5))
 
    Supports all opts that #'query supports
    Additionally `:return-keys? true`  will return database-generated keys."
